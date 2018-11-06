@@ -60,6 +60,13 @@ describe('document matcher', () => {
             expect(documentMatcher.match(data2)).toEqual(false);
             expect(documentMatcher.match(data3)).toEqual(false);
             expect(documentMatcher.match(data4)).toEqual(false);
+
+            documentMatcher.parse('some:data AND NOT other:stuff');
+
+            expect(documentMatcher.match(data1)).toEqual(true);
+            expect(documentMatcher.match(data2)).toEqual(false);
+            expect(documentMatcher.match(data3)).toEqual(false);
+            expect(documentMatcher.match(data4)).toEqual(false);
         });
 
         it('can handle "AND NOT" operators', () => {
@@ -74,12 +81,26 @@ describe('document matcher', () => {
             expect(documentMatcher.match(data2)).toEqual(true);
             expect(documentMatcher.match(data3)).toEqual(false);
             expect(documentMatcher.match(data4)).toEqual(false);
+        });
 
-            documentMatcher.parse('some:data AND NOT other:stuff AND NOT bytes:1234');
+        it('can handle long complex chaining of operators', () => {
+            const data1 = { some: 'data', other: 'things', third: 'stuff', fourth: 'stuff' };
+            const data2 = { some: 'data', other: 'things', third: 'stuff', fourth: 'other' };
+            const data3 = { some: 'data', other: 'things', third: 'other', fourth: 'stuff' };
+            const data4 = { some: 'data', other: 'stuff' };
+
+            documentMatcher.parse('some:data AND other:things AND third:stuff AND fourth:stuff');
+
+            expect(documentMatcher.match(data1)).toEqual(true);
+            expect(documentMatcher.match(data2)).toEqual(false);
+            expect(documentMatcher.match(data3)).toEqual(false);
+            expect(documentMatcher.match(data4)).toEqual(false);
+
+             documentMatcher.parse('some:data AND NOT other:stuff AND NOT bytes:1234');
 
             expect(documentMatcher.match(data1)).toEqual(true);
             expect(documentMatcher.match(data2)).toEqual(true);
-            expect(documentMatcher.match(data3)).toEqual(false);
+            expect(documentMatcher.match(data3)).toEqual(true);
             expect(documentMatcher.match(data4)).toEqual(false);
         });
 
@@ -468,16 +489,16 @@ describe('document matcher', () => {
             expect(documentMatcher.match(data8)).toEqual(true);
             expect(documentMatcher.match(data9)).toEqual(false);
 
-            documentMatcher.parse('key:value AND (duration:(<=10000 AND >=343) AND ipfield:{"192.198.0.0" TO "192.198.0.255"])', { ipfield: 'ip' });
+            documentMatcher.parse('key:value AND (duration:(<=10000 AND >=343) OR ipfield:{"192.198.0.0" TO "192.198.0.255"])', { ipfield: 'ip' });
 
             expect(documentMatcher.match(data1)).toEqual(true);
             expect(documentMatcher.match(data2)).toEqual(false);
             expect(documentMatcher.match(data3)).toEqual(false);
-            expect(documentMatcher.match(data4)).toEqual(false);
-            expect(documentMatcher.match(data5)).toEqual(false);
+            expect(documentMatcher.match(data4)).toEqual(true);
+            expect(documentMatcher.match(data5)).toEqual(true);
             expect(documentMatcher.match(data6)).toEqual(true);
             expect(documentMatcher.match(data7)).toEqual(false);
-            expect(documentMatcher.match(data8)).toEqual(false);
+            expect(documentMatcher.match(data8)).toEqual(true);
             expect(documentMatcher.match(data9)).toEqual(false);
         });
     });
@@ -599,7 +620,7 @@ describe('document matcher', () => {
             expect(documentMatcher.match(data5)).toEqual(false);
         });
 
-        it('can can complex queries', () => {
+        it('can can complex queries part1', () => {
             // all of these are the same date
             const data1 = { _created: '2018-10-18T18:13:20.683Z', some: 'key', bytes: 1232322 };
             const data2 = { _created: '2018-10-18T18:13:20.683Z', other: 'key', bytes: 1232322, _updated: '2018-10-18T20:13:20.683Z' };
@@ -630,6 +651,55 @@ describe('document matcher', () => {
             expect(documentMatcher.match(data3)).toEqual(false);
             expect(documentMatcher.match(data4)).toEqual(false);
             expect(documentMatcher.match(data5)).toEqual(true);
+        });
+
+        it('can handle more complex queries part2', () => {
+            const data1 = { date: '2018-10-10T19:30:00Z', field1: { subfield: 'value' }, field2: 60, field3: 15, field4: 'sometext', field4: 'value2' };
+            const data2 = { date: '2018-10-10T19:30:00Z', field1: { subfield: 'value' }, field2: 60, field3: 15, field4: 'sometext', field4: 'value1' };
+            const data3 = { date: '2018-10-10T19:30:00Z', field1: { subfield: 'value' }, field2: 60, field3: 15, field4: 'othertext', field4: 'value1' };
+            const data4 = { date: '2018-10-10T19:30:00Z', field1: { subfield: 'value' }, field2: 60, field3: 16, field4: 'othertext', field4: 'value1' };
+            const data5 = { date: '2018-10-10T19:30:00Z', field1: { subfield: 'value' }, field2: 60 };
+            const data6 = { date: '2018-10-10T19:30:00Z', field1: { subfield: 'value' }, field2: 33, field3: 16, field4: 'othertext', field4: 'value1' };
+
+            const query1 = 'date:[2018-10-10T19:30:00Z TO *] AND field1.subfield:value AND field2:(1 OR 2 OR 5 OR 20 OR 50 OR 60) AND NOT (field3:15 AND field4:sometext) AND NOT field4:value2';
+            expect(() => documentMatcher.parse(query1)).not.toThrow();
+            documentMatcher.parse(query1, { date: 'date' });
+
+            expect(documentMatcher.match(data1)).toEqual(false);
+            expect(documentMatcher.match(data2)).toEqual(false);
+            expect(documentMatcher.match(data3)).toEqual(false);
+            expect(documentMatcher.match(data4)).toEqual(true);
+            expect(documentMatcher.match(data5)).toEqual(true);
+            expect(documentMatcher.match(data6)).toEqual(false);
+
+            const data7 = { date1: '2018-09-16T04:30:00Z', ip_field: '192.168.196.145', date2: '2018-10-10T23:39:01Z', field1: 1 };
+            const data8 = { date1: '2018-09-16T04:30:00Z', ip_field: '192.168.196.145', date2: '2018-10-10T23:39:01Z', field1: 2 };
+            const data9 = { date1: '2018-09-16T04:30:00Z', ip_field: '192.168.196.145', date2: '2018-10-11T23:39:01Z', field1: 1 };
+            const data10 = { date1: '2018-09-16T04:30:00Z', ip_field: '192.168.196.196', date2: '2018-10-10T23:39:01Z', field1: 1 };
+            const data11 = { date1: '2018-09-09T04:30:00Z', ip_field: '192.168.196.145', date2: '2018-10-10T23:39:01Z', field1: 1 };
+
+            const query2 = 'date1:[2018-09-10T00:00:00Z TO 2018-10-10T23:39:01Z] AND ip_field:[192.168.196.145 TO 192.168.196.195] AND date2:[2018-09-10T00:00:00Z TO 2018-10-10T23:39:01Z] AND field1:1';
+            
+            expect(() => documentMatcher.parse(query2)).not.toThrow();
+            documentMatcher.parse(query2, { date1: 'date', ip_field: 'ip', date2: 'date' });
+
+            expect(documentMatcher.match(data7)).toEqual(true);
+            expect(documentMatcher.match(data8)).toEqual(false);
+            expect(documentMatcher.match(data9)).toEqual(false);
+            expect(documentMatcher.match(data10)).toEqual(false);
+            expect(documentMatcher.match(data11)).toEqual(false);
+
+            // const data12 = {field1: '', ip_field: '192.168.196.145', date: '2048-09-30T23:20:01Z' };
+            // const data12 = {field1: '', ip_field: '192.168.196.145', date: '2017-09-30T23:20:01Z' };
+            // const data12 = {field1: '', ip_field: '192.168.196.144', date: '2048-09-30T23:20:01Z' };
+            // const data12 = {field1: '', ip_field: '192.168.196.145', date: '2048-09-30T23:20:01Z' };
+
+            // const query3 = 'field1:m?-?????*.blahblah AND ip_field:[192.168.196.145 TO 192.168.196.195] AND date:[2018-09-30T23:20:01Z TO *]'
+
+            // expect(() => documentMatcher.parse(query3)).not.toThrow();
+            // //TODO: fix this regex here!!!
+            // documentMatcher.parse(query3, {field1: 'regex', ip_field: 'ip', date: 'date' });
+
         });
     });
 
