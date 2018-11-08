@@ -102,24 +102,15 @@ export default class StringType extends BaseType {
                 return { field: '__parsed', term: createParsedField(topField) };
             }
 
+            if (node.regexpr) {
 
-            // if (isWildCard(node.term as string) && isWildCard(node.field as string)) {
-            //     const wildCardQuery = parseWildCard(node.term as string);
-            //     console.log('whats the new wildCardQuery', wildCardQuery)
-            //     const term = `(data.${topField} ? data.${topField}.match(/^${wildCardQuery}$/g) !== null : false)`;
-            //     return { field: '__parsed', term };
-            // }
+                filterFnBuilder((str: string): boolean => {
+                    if (typeof str !== 'string') return false;
+                    return match(str, node.term as string);
+                });
 
-            //TODO: regexp not ready yet
-            // if (node.regexpr) {
-            //     //TODO: this is not correct?
-            //     const term = `(data.${topField} ? data.${topField}.match(/^(${node.term})$/) !== null : false)`;
-            //     return { field: '__parsed', term };
-            // }
-
-
-          
-
+                return { field: '__parsed', term: createParsedField(topField) };
+            }
             
             return node;
         }
