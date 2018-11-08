@@ -20,5 +20,6 @@ export interface ast {
     inclusive_max?: string|number;
     term_min?: string|number;
     term_max?: string|number;
-    parens?: Boolean
+    parens?: Boolean,
+    regexpr?: Boolean
 }

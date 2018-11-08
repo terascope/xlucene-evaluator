@@ -32,8 +32,10 @@ export default class DocumentMatcher extends LuceneQueryParser {
     private _buildFilterFn() {
         const { _ast: ast, types, _parseRange: parseRange } = this;
         const parsedAst = types.processAst(ast);
-        const AND_MAPPING = { AND: true, 'AND NOT': true, NOT: 'true', '<implicit>': true };
-       
+        const AND_MAPPING = { AND: true, 'AND NOT': true, NOT: 'true' };
+        // default operator in elasticsearch is OR
+        const OR_MAPPING = { OR: true, '<implicit>': true };
+
         function functionBuilder(node:ast, parent: ast, fnStrBody: string, _field:string, isNegation:Boolean) {
             const field = (node.field && node.field !== "<implicit>") ? node.field : _field;
             let addParens = false;
@@ -82,7 +84,7 @@ export default class DocumentMatcher extends LuceneQueryParser {
                 fnStr += functionBuilder(node.left, node, '', field, negateLeftExp);
             }
 
-            if (node.operator === 'OR') fnStr += ' || ';
+            if (OR_MAPPING[node.operator]) fnStr += ' || ';
             if (AND_MAPPING[node.operator]) fnStr += ' && ';
 
             if (node.right) {
