@@ -9,8 +9,7 @@ export default class DocumentMatcher extends LuceneQueryParser {
     private filterFn: Function|undefined;
     private types: TypeManger;
 
-    // TODO: chang the any on typeConfig
-    constructor(luceneStr?: string, typeConfig?:any) {
+    constructor(luceneStr?: string, typeConfig?:object) {
         super();
         this.types = new TypeManger(typeConfig);
         bindThis(this, DocumentMatcher);
@@ -21,7 +20,7 @@ export default class DocumentMatcher extends LuceneQueryParser {
         }
     }
 
-    public parse(luceneStr: string, typeConfig?: any) {
+    public parse(luceneStr: string, typeConfig?: object) {
         if (typeConfig) {
             this.types = new TypeManger(typeConfig);
         }
@@ -115,7 +114,6 @@ export default class DocumentMatcher extends LuceneQueryParser {
             const strFilterFunction = new Function(...strFnArgs);
             this.filterFn = (data:object) => strFilterFunction(...argsFns, data);
         } catch (err) {
-            console.log('the error', err)
             throw new Error(`error while attempting to build filter function \n\n new function components: ${strFnArgs} \n\nerror: ${err.message}`);
         }
     }
