@@ -70,6 +70,15 @@ export default class StringType extends BaseType {
         function parseRegex(node: ast, _field: string): ast {
             const topField = node.field || _field;
 
+            if (node.regexpr) {
+                filterFnBuilder((str: string): boolean => {
+                    if (typeof str !== 'string') return false;
+                    return match(str, node.term as string);
+                });
+
+                return { field: '__parsed', term: createParsedField(topField) };
+            }
+
             if (isWildCard(node.field as string)) {
                 const term = parseWildCard(node.term as string);
 
@@ -97,16 +106,6 @@ export default class StringType extends BaseType {
                 filterFnBuilder((str: string): boolean => {
                     if (typeof str !== 'string') return false;
                     return match(str, wildCardQuery);
-                });
-
-                return { field: '__parsed', term: createParsedField(topField) };
-            }
-
-            if (node.regexpr) {
-
-                filterFnBuilder((str: string): boolean => {
-                    if (typeof str !== 'string') return false;
-                    return match(str, node.term as string);
                 });
 
                 return { field: '__parsed', term: createParsedField(topField) };
