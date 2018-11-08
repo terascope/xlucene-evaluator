@@ -1,3 +1,4 @@
+'use strict';
 const { DocumentMatcher } = require('../src');
 
 describe('document matcher', () => {
@@ -786,18 +787,18 @@ describe('document matcher', () => {
             expect(documentMatcher.match(data3)).toEqual(false);
             expect(documentMatcher.match(data4)).toEqual(false);
 
-            documentMatcher.parse('key:/ab*/');
+            documentMatcher.parse('key:/ab*c*/');
 
             expect(documentMatcher.match(data1)).toEqual(true);
             expect(documentMatcher.match(data2)).toEqual(false);
             expect(documentMatcher.match(data3)).toEqual(true);
             expect(documentMatcher.match(data4)).toEqual(false);
 
-            documentMatcher.parse('key:/.*abc??/');
+            documentMatcher.parse('key:/.*abcd?e?/');
 
             expect(documentMatcher.match(data1)).toEqual(false);
             expect(documentMatcher.match(data2)).toEqual(false);
-            expect(documentMatcher.match(data3)).toEqual(false);
+            expect(documentMatcher.match(data3)).toEqual(true);
             expect(documentMatcher.match(data4)).toEqual(true);
         });
 
