@@ -78,6 +78,8 @@ interface geoDistance {
     unit: Units;
 }
 
+//TODO: allow ranges to be input and compare the two regions if they intersect
+
 export default class GeoType extends BaseType {
     private fields: object;
 

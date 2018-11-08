@@ -321,13 +321,13 @@ describe('document matcher', () => {
             const data2 = { ip: '1:2:3:4:5:6:7:8' };
             const data3 = { ip: 'fe80::/10' };
 
-            documentMatcher.parse('ip:"157.60.0.1"');
+            documentMatcher.parse('ip:157.60.0.1');
 
             expect(documentMatcher.match(data1)).toEqual(true);
             expect(documentMatcher.match(data2)).toEqual(false);
             expect(documentMatcher.match(data3)).toEqual(false);
 
-            documentMatcher.parse('ip:"1:2:3:4:5:6:7:8"');
+            documentMatcher.parse('ip:1:2:3:4:5:6:7:8');
 
             expect(documentMatcher.match(data1)).toEqual(false);
             expect(documentMatcher.match(data2)).toEqual(true);
@@ -354,7 +354,7 @@ describe('document matcher', () => {
             expect(documentMatcher.match(data4)).toEqual(false);
            // TODO: test cidrs that intersect from both ways
 
-            documentMatcher.parse('ipfield:"1:2:3:4:5:6:7:8"', { ipfield: 'ip' });
+            documentMatcher.parse('ipfield:1:2:3:4:5:6:7:8', { ipfield: 'ip' });
 
             expect(documentMatcher.match(data1)).toEqual(false);
             expect(documentMatcher.match(data2)).toEqual(false);
@@ -376,7 +376,7 @@ describe('document matcher', () => {
             const data4 = { ipfield: '192.198.0.255' };
             const data5 = { ipfield: '192.198.0.0/30' };
 
-            documentMatcher.parse('ipfield:["192.198.0.0" TO "192.198.0.255"]', { ipfield: 'ip' });
+            documentMatcher.parse('ipfield:[192.198.0.0 TO 192.198.0.255]', { ipfield: 'ip' });
 
             expect(documentMatcher.match(data1)).toEqual(true);
             expect(documentMatcher.match(data2)).toEqual(true);
@@ -384,7 +384,7 @@ describe('document matcher', () => {
             expect(documentMatcher.match(data4)).toEqual(true);
             expect(documentMatcher.match(data5)).toEqual(true);
 
-            documentMatcher.parse('ipfield:{"192.198.0.0" TO "192.198.0.255"}', { ipfield: 'ip' });
+            documentMatcher.parse('ipfield:{192.198.0.0 TO 192.198.0.255}', { ipfield: 'ip' });
 
             expect(documentMatcher.match(data1)).toEqual(false);
             expect(documentMatcher.match(data2)).toEqual(true);
@@ -392,7 +392,7 @@ describe('document matcher', () => {
             expect(documentMatcher.match(data4)).toEqual(false);
             expect(documentMatcher.match(data5)).toEqual(true);
 
-            documentMatcher.parse('ipfield:["192.198.0.0" TO "192.198.0.255"}', { ipfield: 'ip' });
+            documentMatcher.parse('ipfield:[192.198.0.0 TO 192.198.0.255}', { ipfield: 'ip' });
 
             expect(documentMatcher.match(data1)).toEqual(true);
             expect(documentMatcher.match(data2)).toEqual(true);
@@ -400,14 +400,13 @@ describe('document matcher', () => {
             expect(documentMatcher.match(data4)).toEqual(false);
             expect(documentMatcher.match(data5)).toEqual(true);
 
-            documentMatcher.parse('ipfield:{"192.198.0.0" TO "192.198.0.255"]', { ipfield: 'ip' });
+            documentMatcher.parse('ipfield:{192.198.0.0 TO 192.198.0.255]', { ipfield: 'ip' });
 
             expect(documentMatcher.match(data1)).toEqual(false);
             expect(documentMatcher.match(data2)).toEqual(true);
             expect(documentMatcher.match(data3)).toEqual(true);
             expect(documentMatcher.match(data4)).toEqual(true);
             expect(documentMatcher.match(data5)).toEqual(true);
-
         });
 
         it('can do AND OR ip matches', () => {
@@ -556,7 +555,6 @@ describe('document matcher', () => {
         });
 
         it('can can handle "< > <= >=", with type changes', () => {
-            // all of these are the same date
             const data1 = { _created: 'Thu Oct 18 2018 22:13:20 GMT-0700' };
             const data2 = { _created: '2018-10-18T18:13:20.683Z' };
             const data3 = { _created: '2018-10-18T18:15:34.123Z' };
@@ -589,14 +587,13 @@ describe('document matcher', () => {
         });
 
         it('can can handle [] {} {], with type changes', () => {
-            // all of these are the same date
             const data1 = { _created: 'Thu Oct 18 2018 22:13:20 GMT-0700' };
             const data2 = { _created: '2018-10-18T18:13:20.683Z' };
             const data3 = { _created: '2018-10-18T18:15:34.123Z' };
             const data4 = { _created: 'Thu, 18 Oct 2020 18:13:20 GMT' };
             const data5 = { _created: 'Thu, 13 Oct 2018 18:13:20 GMT' };
 
-            documentMatcher.parse('_created:["2018-10-18T18:13:20.683Z" TO *]', { _created: 'date' });
+            documentMatcher.parse('_created:[2018-10-18T18:13:20.683Z TO *]', { _created: 'date' });
 
             expect(documentMatcher.match(data1)).toEqual(true);
             expect(documentMatcher.match(data2)).toEqual(true);
@@ -612,7 +609,7 @@ describe('document matcher', () => {
             expect(documentMatcher.match(data4)).toEqual(false);
             expect(documentMatcher.match(data5)).toEqual(true);
 
-            documentMatcher.parse('_created:["2018-10-18T18:13:20.000Z" TO "2018-10-18T18:13:20.783Z"]',  { _created: 'date' });
+            documentMatcher.parse('_created:[2018-10-18T18:13:20.000Z TO 2018-10-18T18:13:20.783Z]',  { _created: 'date' });
 
             expect(documentMatcher.match(data1)).toEqual(false);
             expect(documentMatcher.match(data2)).toEqual(true);
@@ -643,7 +640,7 @@ describe('document matcher', () => {
             const data2 = { location: '22.435967,-150.867710', other: 'key', bytes: 123432 };
             const data3 = { location: '22.435967,-150.867710', bytes: 100 };
 
-            documentMatcher.parse('location:(_geo_box_top_left_:"33.906320,-112.758421" _geo_box_bottom_right_:"32.813646,-111.058902") OR (some:ke* OR bytes:>=10000)', { location: 'geo', some: 'regex' });
+            documentMatcher.parse('location:(_geo_box_top_left_:"33.906320,-112.758421" _geo_box_bottom_right_:"32.813646,-111.058902") OR (some:/ke.*/ OR bytes:>=10000)', { location: 'geo' });
 
             expect(documentMatcher.match(data1)).toEqual(true);
             expect(documentMatcher.match(data2)).toEqual(true);
