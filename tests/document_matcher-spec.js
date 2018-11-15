@@ -64,7 +64,7 @@ describe('document matcher', () => {
             expect(documentMatcher.match(data3)).toEqual(false);
             expect(documentMatcher.match(data4)).toEqual(false);
 
-            documentMatcher.parse('some:data AND NOT other:stuff');
+            documentMatcher.parse('some:data ! other:stuff');
 
             expect(documentMatcher.match(data1)).toEqual(true);
             expect(documentMatcher.match(data2)).toEqual(false);
@@ -79,6 +79,13 @@ describe('document matcher', () => {
             const data4 = { some: 'data', other: 'stuff' };
 
             documentMatcher.parse('some:data AND NOT other:stuff');
+
+            expect(documentMatcher.match(data1)).toEqual(true);
+            expect(documentMatcher.match(data2)).toEqual(true);
+            expect(documentMatcher.match(data3)).toEqual(false);
+            expect(documentMatcher.match(data4)).toEqual(false);
+
+            documentMatcher.parse('some:data AND ! other:stuff');
 
             expect(documentMatcher.match(data1)).toEqual(true);
             expect(documentMatcher.match(data2)).toEqual(true);
@@ -100,6 +107,13 @@ describe('document matcher', () => {
             expect(documentMatcher.match(data4)).toEqual(false);
 
              documentMatcher.parse('some:data AND NOT other:stuff AND NOT bytes:1234');
+
+            expect(documentMatcher.match(data1)).toEqual(true);
+            expect(documentMatcher.match(data2)).toEqual(true);
+            expect(documentMatcher.match(data3)).toEqual(true);
+            expect(documentMatcher.match(data4)).toEqual(false);
+
+            documentMatcher.parse('some:data AND ! other:stuff AND ! bytes:1234');
 
             expect(documentMatcher.match(data1)).toEqual(true);
             expect(documentMatcher.match(data2)).toEqual(true);
@@ -916,8 +930,15 @@ describe('document matcher', () => {
             const data2 = { date: '2018-10-10T17:36:13Z', value: 253, type: 'other' };
             const data3 = { date: '["2018-10-10T17:36:13Z" TO "2018-10-10T17:36:13Z"]', value: 253, type: 'other' }
             const luceneQuery = 'date:["2018-10-10T17:36:13Z" TO "2018-10-10T17:36:13Z"] AND NOT value:(251 OR 252) AND NOT type:example';
+            const luceneQuery2 = 'date:["2018-10-10T17:36:13Z" TO "2018-10-10T17:36:13Z"] AND ! value:(251 OR 252) AND ! type:example';
 
             documentMatcher.parse(luceneQuery);
+
+            expect(documentMatcher.match(data1)).toEqual(false);
+            expect(documentMatcher.match(data2)).toEqual(true);
+            expect(documentMatcher.match(data3)).toEqual(false);
+
+            documentMatcher.parse(luceneQuery2);
 
             expect(documentMatcher.match(data1)).toEqual(false);
             expect(documentMatcher.match(data2)).toEqual(true);
