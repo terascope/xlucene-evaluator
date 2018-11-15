@@ -156,6 +156,14 @@ describe('document matcher', () => {
             const data4 = { other: 33 };
             const data5 = { age: 10 };
 
+            documentMatcher.parse('age:>0');
+
+            expect(documentMatcher.match(data)).toEqual(true);
+            expect(documentMatcher.match(data2)).toEqual(true);
+            expect(documentMatcher.match(data3)).toEqual(true);
+            expect(documentMatcher.match(data4)).toEqual(false);
+            expect(documentMatcher.match(data5)).toEqual(true);
+
             documentMatcher.parse('age:>10');
 
             expect(documentMatcher.match(data)).toEqual(true);
@@ -250,6 +258,15 @@ describe('document matcher', () => {
             const data4 = { age: 20 };
             const data5 = { age: 50 };
             const data6 = { age: 100 };
+
+            documentMatcher.parse('age:[0 TO *]');
+
+            expect(documentMatcher.match(data1)).toEqual(true);
+            expect(documentMatcher.match(data2)).toEqual(true);
+            expect(documentMatcher.match(data3)).toEqual(true);
+            expect(documentMatcher.match(data4)).toEqual(true);
+            expect(documentMatcher.match(data5)).toEqual(true);
+            expect(documentMatcher.match(data6)).toEqual(true);
 
             documentMatcher.parse('age:[10 TO 20]');
 
