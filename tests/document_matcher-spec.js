@@ -25,6 +25,33 @@ describe('document matcher', () => {
             expect(documentMatcher.match(badData3)).toEqual(false);
         });
 
+        it('can match boolean terms', () => {
+            const data1 = { bool: false };
+            const data2 = { bool: true };
+            const data3 = { bool: 'false' };
+            const data4= { bool: 'true' };
+            const data5 = { something: 'else' };
+            const data6 = {};
+
+            documentMatcher.parse('bool:false');
+
+            expect(documentMatcher.match(data1)).toEqual(true);
+            expect(documentMatcher.match(data2)).toEqual(false);
+            expect(documentMatcher.match(data3)).toEqual(false);
+            expect(documentMatcher.match(data4)).toEqual(false);
+            expect(documentMatcher.match(data5)).toEqual(false);
+            expect(documentMatcher.match(data6)).toEqual(false);
+
+            documentMatcher.parse('bool:true');
+
+            expect(documentMatcher.match(data1)).toEqual(false);
+            expect(documentMatcher.match(data2)).toEqual(true);
+            expect(documentMatcher.match(data3)).toEqual(false);
+            expect(documentMatcher.match(data4)).toEqual(false);
+            expect(documentMatcher.match(data5)).toEqual(false);
+            expect(documentMatcher.match(data6)).toEqual(false);
+        });
+
         it('can handle "&& AND" operators', () => {
             const data1 = { some: 'data' };
             const data2 = { some: 'data', other: 'things' };

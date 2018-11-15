@@ -68,10 +68,13 @@ export default class DocumentMatcher extends LuceneQueryParser {
                         fnStr += `${node.term}`;
                     }
                 } else {
+                    let term = `"${node.term}"`;
+                    if (node.term === 'true') term = JSON.parse(node.term);
+                    if (node.term === 'false') term = JSON.parse(node.term);
                     if (negation) {
-                        fnStr += `data.${field} != "${node.term}"`;
+                        fnStr += `data.${field} != ${term}`;
                     } else {
-                        fnStr += `data.${field} == "${node.term}"`;
+                        fnStr += `data.${field} == ${term}`;
                     }
                 }
             }
@@ -107,7 +110,7 @@ export default class DocumentMatcher extends LuceneQueryParser {
             strFnArgs.push(key);
             argsFns.push(value);
         });
-        
+
         strFnArgs.push('data', `return ${fnStr}`);
 
         try {
