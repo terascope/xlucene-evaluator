@@ -385,6 +385,7 @@ describe('document matcher', () => {
             expect(documentMatcher.match(data2)).toEqual(true);
             expect(documentMatcher.match(data3)).toEqual(false);
             expect(documentMatcher.match(data4)).toEqual(false);
+
            // TODO: test cidrs that intersect from both ways
 
             documentMatcher.parse('ipfield:1:2:3:4:5:6:7:8', { ipfield: 'ip' });
