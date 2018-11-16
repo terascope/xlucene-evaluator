@@ -82,7 +82,7 @@ interface geoDistance {
 
 type geoPointArr = [number, number];
 type geoPointStr = string;
-type geoObj1 = {lat: string | number, lon: string | number};
+type geoObjShort = {lat: string | number, lon: string | number};
 type geoObj2 = {latitude: string | number, longitude: string | number};
 type geoPoint = geoPointArr | geoPointStr | geoObj1 | geoObj2
 
