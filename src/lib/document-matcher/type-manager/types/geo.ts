@@ -84,7 +84,7 @@ type geoPointArr = [number, number];
 type geoPointStr = string;
 type geoObjShort = {lat: string | number, lon: string | number};
 type geoObjLong = {latitude: string | number, longitude: string | number};
-type geoPoint = geoPointArr | geoPointStr | geoObj1 | geoObj2
+type geoPoint = geoPointArr | geoPointStr | geoObjShort | geoObjLong
 
 
 //TODO: allow ranges to be input and compare the two regions if they intersect
